@@ -71,7 +71,7 @@ class UploadHandler(object):
         Page to upload images.
         Case of POST REQUEST '/upload/'
         """
-        print "aaaaaaaaa",self._request.POST, self._request.FILES
+        # print "aaaaaaaaa",self._request.POST, self._request.FILES
         results = []
         blob_keys = []
         allcaption = ""
@@ -89,12 +89,12 @@ class UploadHandler(object):
             result = {}
             result['name'] = re.sub(r'^.*\\', '',
                                     fieldStorage.name)
-            print result['name']
+            # print result['name']
             result['type'] = fieldStorage.content_type
-            print result['type']
+            # print result['type']
             if self.validate(result):
                 image_url = os.path.join(settings.MEDIA_URL, 'tmp', result['name'])
-                print image_url
+                # print image_url
                 destination = open(image_url, 'wb+')
                 for chunk in fieldStorage.chunks():
                     destination.write(chunk)
@@ -206,9 +206,9 @@ class UploadHandler(object):
             result = {}
             result['name'] = re.sub(r'^.*\\', '',
                                     fieldStorage.name)
-            print result['name']
+            # print result['name']
             result['type'] = fieldStorage.content_type
-            print result['type']
+            # print result['type']
             # result['size'] = self.get_file_size(fieldStorage.file)
             # result['size']
             if self.validate(result):

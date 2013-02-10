@@ -383,8 +383,7 @@ class Entry(models.Model):
             if self.filetype == "application/pdf":
                 image_url = os.path.join(settings.MEDIA_URL, 'tmp', self.file.name)
                 # image_url = self.file.path
-                print "file:",image_url, self.file
-                print commands.getoutput("convert '%s[0]' -resize 600x800 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
+                commands.getoutput("convert '%s[0]' -resize 600x800 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
                 image = File(open(image_url.encode("utf-8")+".png"))
                 self.thumbnail = image
             elif self.filetype.count("image") > 0:
@@ -394,8 +393,7 @@ class Entry(models.Model):
             elif self.filetype.count("video") > 0 or self.filetype == "application/octet-stream":
                 image_url = os.path.join(settings.MEDIA_URL, 'tmp', self.file.name)
                 # image_url = self.file.path
-                print "file:",image_url, self.file
-                print commands.getoutput("ffmpeg -ss 1 -vframes 1 -i '%s' -f image2 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
+                commands.getoutput("ffmpeg -ss 1 -vframes 1 -i '%s' -f image2 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
                 image = File(open(image_url.encode("utf-8")+".png"))
                 self.thumbnail = image
             else:
