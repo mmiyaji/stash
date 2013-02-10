@@ -95,7 +95,7 @@ class UploadHandler(object):
             if self.validate(result):
                 image_url = os.path.join(settings.MEDIA_URL, 'tmp', result['name'])
                 # print image_url
-                destination = open(image_url, 'wb+')
+                destination = open(image_url.encode("utf-8"), 'wb+')
                 for chunk in fieldStorage.chunks():
                     destination.write(chunk)
                     destination.close()
