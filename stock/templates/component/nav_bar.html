@@ -1,0 +1,41 @@
+    <!-- Navbar
+         ================================================== -->
+    <div class="navbar navbar-fixed-top navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">Stash</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li {% if not target %}class="active"{% else %}{%ifequal target "home"%}class="active"{%endifequal%}{% endif %}><a href="/">トップページ</a></li>
+              <li {%ifequal target "upload"%}class="active"{%endifequal%}><a href="/upload/">アップロード</a></li>
+              <li {%ifequal target "photo"%}class="active"{%endifequal%}><a href="/photo/">写真管理</a></li>
+              <li {%ifequal target "author"%}class="active"{%endifequal%}><a href="/author/">著者(製作者)</a></li>
+              <li class="dropdown{%ifequal target "archive"%} active{%endifequal%}">
+                <a href="#"
+                   class="dropdown-toggle"
+                   data-toggle="dropdown">
+                  アーカイブ化
+                  <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <!-- <li><a href="/archive/">選択</a></li> -->
+                  <li class="divider"></li>
+                  <li><a href="/archive/author/">著者ごとにまとめてダウンロード</a></li>
+                  <!-- <li><a href="/archive/year/">年度ごとにまとめてダウンロード</a></li> -->
+                </ul>
+              </li>
+              {% if not user.is_anonymous %}
+              <li {%ifequal target "tag"%}class="active"{%endifequal%}><a href="/tag/">タグ管理</a></li>
+              <li {%ifequal target "group"%}class="active"{%endifequal%}><a href="/group/">グループ管理</a></li>
+              {% endif %}
+              <li {%ifequal target "login"%}class="active"{%endifequal%}>{% if user.is_anonymous %}<a href="/login/">ログイン</a>{% else %}<a href="/logout/">ログアウト【{{user}}】</a>{% endif %}</li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>

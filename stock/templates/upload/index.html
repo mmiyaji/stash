@@ -1,0 +1,69 @@
+{% extends "base/base.html" %}
+{% block main %}
+<!-- Masthead
+     ================================================== -->
+<div class="page-header">
+  <h1>アップロード</h1>
+</div>
+  <p class="lead">「ファイルの追加」ボタンを押して，登録したい写真を選択(複数選択可能)しましょう．<br>
+  選択しただけではファイルはシステムに登録されません．「アップロードの開始」ボタンを押してください．
+  </p>
+<br>
+<!-- The file upload form used as target for the file upload widget -->
+<form id="fileupload" action="/upload/" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+  <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+  <div class="row">
+    <div class="span7">
+      <!-- The fileinput-button span is used to style the file input field as button -->
+      <div class="fileupload fileupload-new" data-provides="fileupload">
+        <div class="input-append">
+          <div class="uneditable-input span3"><i class="icon-file fileupload-exists"></i> <span class="fileupload-preview"></span></div><span class="btn btn-file"><span class="fileupload-new">Select file</span><span class="fileupload-exists">Change</span><input type="file" name="files" multiple/></span><a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary start">
+        <i class="icon-upload icon-white"></i>
+        <span>アップロード開始</span>
+      </button>
+      <button type="reset" class="btn btn-warning cancel">
+        <i class="icon-ban-circle icon-white"></i>
+        <span>アップロード中止</span>
+      </button>
+      <div class="btn-toolbar input-prepend">
+      <span class="add-on">一括キャプション登録</span>
+      <input type="text" class="input-medium" name="allcaption" value="">
+      <span class="add-on">一括コメント登録</span>
+      <input type="text" class="input-medium" name="allcomment" value="">
+      </div>
+      <p class="help-block">一括でタグの登録をします．下のから選択してください（複数選択可能：CTRL押しながら選択）．</p>
+      <select multiple="multiple" class="input-medium" name="alltag">
+        <option>タグなし</option>
+        {% for t in tags %}
+        <option value="{{t.id}}">{{t.name}}</option>
+        {% endfor %}
+      </select>
+      <!-- <button type="button" class="btn btn-danger delete"> -->
+      <!--   <i class="icon-trash icon-white"></i> -->
+      <!--   <span>削除</span> -->
+      <!-- </button> -->
+      <!-- <input type="checkbox" class="dtoggle"> -->
+      <!-- <button type="button" class="btn btn-info update"> -->
+      <!--   <i class="icon-refresh icon-white"></i> -->
+      <!--   <span>更新</span> -->
+      <!-- </button> -->
+      <!-- <input type="checkbox" class="utoggle"> -->
+    </div>
+  </div>
+  <!-- The loading indicator is shown during file processing -->
+  <br>
+  {% csrf_token %}
+</form>
+<br>
+<div class="well">
+  <h3>備考</h3>
+  <ul>
+    <li>アップロード可能なファイルサイズは <strong>10 MB</strong> までです．</li>
+    <li>利用可能な画像ファイル形式は (<strong>JPG, GIF, PNG</strong>) です．</li>
+    <li>ブラウザとしてSafari，Google Chrome，Firefoxをご利用の場合はファイルをウィンドウにドラッグ&amp;ドロップすることで入力されます．</li>
+  </ul>
+</div>
+{% endblock main %}

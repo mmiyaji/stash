@@ -1,0 +1,201 @@
+{% extends "base/base.html" %}
+{% block main %}
+<!-- Masthead
+     ================================================== -->
+<header class="jumbotron subhead" id="overview">
+  <h2 id="title">{{ author.name|default:"" }}</h2>
+  <p class="lead">学籍番号: {{ author.student_id|default:"" }} <small>{{ author.nickname|default:"" }}</small></p>
+  <div class="subnav">
+    <ul class="nav nav-pills">
+      <li><a href="#photo">写真</a></li>
+      <li><a href="#info">詳細</a></li>
+      <li><a href="#archive">アーカイブ化</a></li>
+    </ul>
+  </div>
+</header>
+<section  id="photo">
+  <div class="page-header">
+    <h1>写真</h1>
+  </div>
+  <div class="pagination">
+    <p>{% if pages.max %}全 {{pages.max}}件中 {{pages.start}}~{{pages.end}}件目を表示{% endif %}</p>
+    <ul>
+      {% if pages.pre_page %}
+      <li><a href="/author/{{author.student_id|urlencode}}/?page={{pages.pre_page}}">&laquo;</a></li>
+      {% endif %}
+      {% for page in page_list %}{% ifequal page pages.now_page %}
+      <li class="active">
+        <a href="#">{{page}}</a>
+      </li>{% else %}
+      {% ifequal page -1 %}
+      <li class="disabled"><a href="#">...</a></li>
+      {% else %}
+      <li><a href="/author/{{author.student_id|urlencode}}/?page={{page}}">{{page}}</a></li>
+      {% endifequal %}{% endifequal %}{% endfor %}
+      {% if pages.next_page %}
+      <li><a href="/author/{{author.student_id|urlencode}}/?page={{pages.next_page}}">&raquo;</a></li>
+      {% endif %}
+    </ul>
+  </div>
+  {% if files %}
+  <div class="thumbnail">
+    <table role="presentation" class="table table-striped">
+      <thead>
+        <tr class="template-upload">
+          <th>プレビュー</th>
+          <th>ファイル情報</th>
+          <th>著者情報</th>
+          <th></th><th></th>
+        </tr>
+      </thead>
+      <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery">
+        {% for file in files %}
+        <tr class="template-download">
+          <td class="preview">
+            <a href="{{file.get_original_img_url}}" title="{{file.title}}" rel="gallery" download="{{file.title}}" class="thumbnail" uuid="{{file.uuid}}">
+              <img src="{{file.get_thumbnail_img_url}}">
+            </a>
+          </td>
+          <td class="name">
+            <ul>
+              <li>ファイル名: <a href="{{file.get_original_img_url}}" title="{{file.title}}" rel="gallery" download="{{file.title}}" uuid="{{file.uuid}}">{{file.title}}</a></li>
+              <li>元のファイル名: <span>{{file.original_title}}</span></li>
+              <li>撮影日: <span>{{file.published_at}}</span></li>
+              <li>写真の大きさ: <span>{{file.image_width}} x {{file.image_height}}, {{file.image.size|filesizeformat}}</span></li>
+              <li>キャプション: <span>{{file.caption|default:"なし"}}</span></li>
+              <li>コメント: <span>{{file.comment|default:"なし"}}</span></li>
+              <li>タグ: <span>{% for tag in file.tag.all %}{{tag.name}},{% endfor %}</span></li>
+            </ul>
+          </td>
+          <td class="author">
+            {% if file.get_authors %}
+            <ul>
+              {% for a in file.get_authors %}
+              <li>
+                <a href="/author/{{a.student_id|urlencode}}/" target="_blank">{{a.student_id}}({{a.name}})</a>
+              </li>
+              {% endfor %}
+              <ul>
+                {% else %}
+                <div class="alert aalert-ja lert-warnig alert-block">
+                  <a class="close" data-dismiss="alert" href="#">×</a>
+                  <h4 class="alert-heading">Warning!</h4>
+                  登録された著者情報が見つかりません
+                </div>
+                {% endif %}
+          </td>
+          <td class="update">
+            <a class="btn btn-success" href="/photo/{{file.uuid}}/">
+              <i class="icon-refresh icon-white"></i>
+              編集
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="nocontent">アップロードされた写真がありません<p>
+    {% endif %}
+</section>
+<section id="info">
+  <div class="page-header">
+    <h1>著者情報詳細</h1>
+  </div>
+  <div>
+    <form class="form-horizontal" method="POST" action="/author/{{author.student_id|urlencode}}/update/" accept-charset="UTF-8">
+      <fieldset>
+        <div class="control-group">
+          <label class="control-label" for="input_author">氏名</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="name" value="{{author.name|default:""}}">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_roman">名前のよみ</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="roman" value="{{author.roman|default:""}}">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_caption">学籍番号</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="student_id" value="{{author.student_id}}">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_admitted">入学年度</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="admitted_year" value="{{author.admitted_at.year}}">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_groups">所属</label>
+          <div class="controls">
+            <!-- <input type="text" class="input-xlarge" name="groups" value="{% for g in author.get_groups %}{{g.year.year}}:{{g.group.name}},{% endfor %}"> -->
+            <ol>
+            {% for y,g in my_groups %}
+            <li>
+            <div class="input-prepend">
+              <span class="add-on">{{y}}年度</span>
+              <select name="groups">
+                <option value="">未設定</option>
+                {% for group in groups %}
+                <option value="{{group.id}}" {% ifequal group.name g %}selected=selected{% endifequal %}>{{group}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            </li>
+            {% endfor %}
+            </ol>
+            <p class="help-block">所属するグループです．</p>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_nickname">ニックネーム</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="nickname" value="{{author.nickname|default:""}}">
+            <p class="help-block">設定されたニックネームです．</p>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_updateat">最終更新日</label>
+          <div class="controls">
+            <span class="input-xlarge uneditable-input">{{author.updated_at}}</span>
+            <p class="help-block">変更不可</p>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_createat">登録日時</label>
+          <div class="controls">
+            <span class="input-xlarge uneditable-input">{{author.created_at}}</span>
+            <p class="help-block">変更不可</p>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="input_num">登録作品数</label>
+          <div class="controls">
+            <span class="input-xlarge uneditable-input">{{author.get_photo_num}}</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">変更を保存</button>
+          <!-- <button type="submit" class="btn btn-danger">削除</button> -->
+          <!-- <button class="btn">Cancel</button> -->
+        </div>
+      </fieldset>
+      {% csrf_token %}
+    </form>
+  </div>
+</section>
+<section id="archive">
+  <div class="page-header">
+    <h1>アーカイブ化</h1>
+  </div>
+  <div class="download-btn">
+    <a class="btn btn-primary" href="/archive/author/{{author.student_id|urlencode}}/" >アーカイブ化設定ページ</a>
+  </div>
+</section>
+{% include "component/image_modal.html" %}
+{% endblock main %}
