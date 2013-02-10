@@ -5,11 +5,10 @@
 <div class="page-header">
   <h2 id="title">著者アーカイブ</h2>
 </div>
-<p class="lead">氏名: {{ author.name|default:"" }} <small>{{ author.nickname|default:"" }}</small><br>
-  学籍番号: {{ author.student_id|default:"" }}</p>
+<p class="lead">氏名: {{ author.name|default:"" }} <small>{{ author.nickname|default:"" }}</small></p>
 <div class="subnav">
   <ul class="nav nav-pills">
-    <li><a href="#select_photo">写真選択</a></li>
+    <li><a href="#select_entry">写真選択</a></li>
     <li><a href="#select_type">書き出しフォルダ形式設定</a></li>
     <li><a href="#select_finelame">写真ファイル名設定</a></li>
     <li><a href="#select_zipfile">書き出しファイル名設定</a></li>
@@ -20,7 +19,7 @@
 <br>
 {% if files %}
 <!-- The file upload form used as target for the file upload widget -->
-<form id="fileuploads" action="/archive/author/{{author.student_id}}/" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+<form id="fileuploads" action="/archive/author/{{author.id}}/" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
   <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
   <div class="row fileupload-buttonbar">
     <!-- The global progress information -->
@@ -35,7 +34,7 @@
   </div>
   <!-- The loading indicator is shown during file processing -->
   <div class="fileupload-loading"></div>
-  <h2 id="select_photo">写真選択</h2>
+  <h2 id="select_entry">写真選択</h2>
   <!-- The table listing the files available for upload/download -->
   <div class="well">
     <table role="presentation" class="table table-striped">
@@ -59,7 +58,7 @@
         <tr class="template-download">
           <td class="preview">
             <a href="{{file.get_original_img_url}}" title="{{file.title}}" rel="gallery" download="{{file.title}}" class="thumbnail" uuid="{{file.uuid}}">
-              <img src="{{file.get_thumbnail_img_url}}" alt="photo">
+              <img src="{{file.get_thumbnail_img_url}}" alt="entry">
             </a>
           </td>
           <td class="name">
@@ -77,7 +76,7 @@
             <ul>
               {% for a in file.get_authors %}
               <li>
-                <a href="/author/{{a.student_id|urlencode}}/" target="_blank">{{a.student_id}}({{a.name}})</a>
+                <a href="/author/{{a.id|urlencode}}/" target="_blank">{{a.id}}({{a.name}})</a>
               </li>
               {% endfor %}
             </ul>
@@ -163,8 +162,8 @@
   <h2 id="select_zipfile">書き出しファイル名設定</h2>
   <div>
     <div class="controls input-append">
-      <label class="control-label">初期設定: archive_学生ID.zip</label>
-      <input type="text" name="archive_zipfile" class="input-xlarge" value="archive_{{author.student_id}}">
+      <label class="control-label">初期設定: archive_ID.zip</label>
+      <input type="text" name="archive_zipfile" class="input-xlarge" value="archive_{{author.id}}">
       <span class="add-on">.zip</span>
     </div>
   </div>

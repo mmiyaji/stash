@@ -111,6 +111,14 @@
           })
           });
           }
+          $(function(){
+          var $container = $('.thumbnails');
+          $container.imagesLoaded( function(){
+          $container.masonry({
+          itemSelector : '.span3'
+          });
+          });
+          });
         -->
     </script>
   </body>

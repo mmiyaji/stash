@@ -8,9 +8,8 @@ Copyright (c) 2012  ruhenheim.org. All rights reserved.
 """
 from __future__ import with_statement
 from views import *
-import simplejson, re, urllib, commands
+import simplejson, re, urllib
 from django import forms
-from django.core.files import File
 # from scan import Scanner
 WEBSITE = 'http://ruhenheim.org/'
 MIN_FILE_SIZE = 1 # bytes
@@ -95,6 +94,7 @@ class UploadHandler(object):
             print result['type']
             if self.validate(result):
                 image_url = os.path.join(settings.MEDIA_URL, 'tmp', result['name'])
+                print image_url
                 destination = open(image_url, 'wb+')
                 for chunk in fieldStorage.chunks():
                     destination.write(chunk)
@@ -113,17 +113,19 @@ class UploadHandler(object):
                 # name = force_unicode(entry.published_at.strftime((smart_str("%Y%m%d%H%M%S_"+str(entry.id).zfill(5)+"."+result['name'].split(".")[-1]))))
                 name = force_unicode(result['name'])
                 entry.title = name
+                entry.filetype = result['type']
                 entry.original_title = result['name']
                 entry.save(isFirst = True)
                 # entry.authors.clear()
-                if result['type'] == "application/pdf":
-                    image_url = os.path.join(settings.MEDIA_URL, 'tmp', result['name'])
-                    commands.getoutput("convert '%s[0]' -resize 600x800 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
-                    image = File(open(image_url.encode("utf-8")+".png"))
-                    print image,image.size,name
-                    entry.image = image
-                else:
-                    entry.image = File(open(os.path.join(settings.MEDIA_URL, 'images', 'screenshot_upload.png')))
+                # if result['type'] == "application/pdf":
+                #     image_url = os.path.join(settings.MEDIA_URL, 'tmp', result['name'])
+                #     commands.getoutput("convert '%s[0]' -resize 600x800 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
+                #     image = File(open(image_url.encode("utf-8")+".png"))
+                #     print image,image.size,name
+                #     entry.image = image
+                # else:
+                #     entry.image = File(open(os.path.join(settings.MEDIA_URL, 'images', 'noimage.png')))
+                entry.file = fieldStorage
                 authors = get_authors(name)
                 for a in authors.keys():
                     author = Author.get_by_name(a)

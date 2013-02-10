@@ -4,16 +4,16 @@
      ================================================== -->
 <header class="jumbotron subhead" id="overview">
   <h2 id="title">{{ author.name|default:"" }}</h2>
-  <p class="lead">学籍番号: {{ author.student_id|default:"" }} <small>{{ author.nickname|default:"" }}</small></p>
+  <p class="lead">{{ author.nickname|default:"" }}</p>
   <div class="subnav">
     <ul class="nav nav-pills">
-      <li><a href="#photo">写真</a></li>
+      <li><a href="#entry">写真</a></li>
       <li><a href="#info">詳細</a></li>
       <li><a href="#archive">アーカイブ化</a></li>
     </ul>
   </div>
 </header>
-<section  id="photo">
+<section  id="entry">
   <div class="page-header">
     <h1>写真</h1>
   </div>
@@ -85,7 +85,7 @@
                 {% endif %}
           </td>
           <td class="update">
-            <a class="btn btn-success" href="/photo/{{file.uuid}}/">
+            <a class="btn btn-success" href="/entry/{{file.uuid}}/">
               <i class="icon-refresh icon-white"></i>
               編集
             </a>
@@ -176,7 +176,7 @@
         <div class="control-group">
           <label class="control-label" for="input_num">登録作品数</label>
           <div class="controls">
-            <span class="input-xlarge uneditable-input">{{author.get_photo_num}}</span>
+            <span class="input-xlarge uneditable-input">{{author.get_entry_num}}</span>
           </div>
         </div>
         <div class="form-actions">
@@ -194,7 +194,7 @@
     <h1>アーカイブ化</h1>
   </div>
   <div class="download-btn">
-    <a class="btn btn-primary" href="/archive/author/{{author.student_id|urlencode}}/" >アーカイブ化設定ページ</a>
+    <a class="btn btn-primary" href="/archive/author/{{author.id|urlencode}}/" >アーカイブ化設定ページ</a>
   </div>
 </section>
 {% include "component/image_modal.html" %}

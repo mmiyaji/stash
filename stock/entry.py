@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-photo.py
+entry.py
 
 Created by mmiyaji on 2012-07-18.
 Copyright (c) 2012  ruhenheim.org. All rights reserved.
@@ -139,7 +139,7 @@ def detail(request, entry_uuid):
     temp_values = {
         "target":"entry",
         "title":u"写真詳細[ %s ]" % entry.title,
-        "photo":entry,
+        "entry":entry,
         "rotate":rotate,
         "recent_authors":Author.objects.order_by("-updated_at").all()[:100],
         "subscroll":True,

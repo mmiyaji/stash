@@ -115,7 +115,7 @@ def detail(request, author_id):
     page=1
     span = 30
     search_query = None
-    author = Author.get_by_student_id(author_id)
+    author = Author.get_by_id(author_id)
     if not author:
         # 見つからない場合は404エラー送出
         raise Http404
@@ -125,7 +125,7 @@ def detail(request, author_id):
         span = int(request.GET['span'])
     if request.GET.has_key('search_query'):
         search_query = request.GET['search_query'].replace(u"　", " ").split(" ")
-    files,entry_count = author.get_photos(span=span, page=page, search_query=search_query)
+    files,entry_count = author.get_entrys(span=span, page=page, search_query=search_query)
     # 所属するグループのリストを作成
     groups = author.my_groups
     page_list,pages = get_page_list(page, entry_count, span)

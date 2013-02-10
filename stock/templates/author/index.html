@@ -111,7 +111,7 @@
       </thead>
       <tbody>
         {% for author in authors %}
-        <tr id="author_{{author.student_id|urlencode}}">
+        <tr id="author_{{author.id|urlencode}}">
           <td>{{ forloop.counter }}</td>
           <td>{{author.student_id}}</td>
           <td>{{author.admitted_at.year}}</td>
@@ -132,7 +132,7 @@
           <td>{{author.roman|default:"未設定"}}</td>
           <td>{{author.updated_at}}</td>
           <!-- <td>{{author.created_at}}</td> -->
-          <td>{{author.get_photo_num}}</td>
+          <td>{{author.get_entry_num}}</td>
           <!-- <td><a class="btn" href="#"><i class="icon-wrench"></i><span>Edit</span></a></td> -->
         </tr>
         {% endfor %}

@@ -6,7 +6,7 @@
   <h2 id="title">一括書き出し [著者一覧]</h2>
   <p class="lead">{% if pages.max %}全 {{pages.max}}件中 {{pages.start}}~{{pages.end}}件目を表示 / {{pages.now_page}}ページ目{% endif %}</p>
 </header>
-<!-- Photo view
+<!-- Entry view
      ================================================== -->
 <div class="btn-toolbar">
   <!-- <div class="btn-group"> -->
@@ -107,7 +107,7 @@
             {# <td>{{author.roman}}</td> #}
             <td>{{author.updated_at}}</td>
             <td>{{author.created_at}}</td>
-            <td>{{author.get_photo_num}}</td>
+            <td>{{author.get_entry_num}}</td>
             <td class="command">
               <label>
                 <i class="icon-download"></i>

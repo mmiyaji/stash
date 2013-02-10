@@ -21,12 +21,12 @@ def home(request):
         page = int(request.GET['page'])
     if request.GET.has_key('span'):
         span = int(request.GET['span'])
-    photos,entry_count = Photo.get_items(span=span, page=page, order="-created_at")
+    entrys,entry_count = Entry.get_items(span=span, page=page, order="-created_at")
     page_list,pages = get_page_list(page, entry_count, span)
     temp_values = {
         "target":"archive",
         "title":u"アーカイブ化",
-        "photos":photos,
+        "entrys":entrys,
         "page_list":page_list,
         "pages":pages,
         }
@@ -80,11 +80,11 @@ def authors(request):
         archive_zipfile = request.POST['archive_zipfile']
         filename = replace_validname(force_unicode(archive_zipfile)) #"archive_"+author.student_id
         for i in isarchive:
-            author = Author.get_by_student_id(i)
+            author = Author.get_by_id(i)
             if not author:
                 continue
             zip_filename = replace_validname(force_unicode(i))
-            files,entry_count = author.get_photos(all=True, listvalue="uuid")
+            files,entry_count = author.get_entrys(all=True, listvalue="uuid")
             z = createZip(list(files[0]), archive_type, archive_filename, zip_filename)
             filepath = os.path.join(settings.MEDIA_URL, settings.EXPORT_PATH, zip_filename+".zip")
             ziplist.append(filepath)
@@ -99,14 +99,14 @@ def author(request, author_id):
     アーカイブページ
     """
     temp_values = Context()
-    author = Author.get_by_student_id(author_id)
+    author = Author.get_by_id(author_id)
     if not author:
         # 見つからない場合は404エラー送出
         raise Http404
     request_type = request.method
     logger.debug(request_type)
     if request_type == 'GET':
-        files,entry_count = author.get_photos(all=True)
+        files,entry_count = author.get_entrys(all=True)
         page_list,pages = get_page_list(1, entry_count, 10000)
         temp_values = {
             "target":"author",
@@ -143,14 +143,14 @@ def createZip(isarchive, archive_type, archive_filename, archive_zipfile):
         dir_type = "/%Y/"
     elif archive_type == 4:
         dir_type = "/"
-    photos = []
+    entrys = []
     fileList = []
     exportPath = []
     for i in isarchive:
-        p = Photo.get_by_uuid(i)
+        p = Entry.get_by_uuid(i)
         if p:
-            photos.append(p)
-            fileList.append(p.image.path)
+            entrys.append(p)
+            fileList.append(p.file.path)
             title = ""
             if archive_filename == 1:
                 title = p.title
@@ -181,24 +181,24 @@ def execZip(fileList, exportPath, filename):
     z.close()
     return filename
 
-def detail(request, photo_uuid):
+def detail(request, entry_uuid):
     """
-    Case of GET REQUEST '/archive/<photo_uuid>/'
+    Case of GET REQUEST '/archive/<entry_uuid>/'
     個別の画像の詳細を表示するページ
     """
     temp_values = Context()
-    photo = Photo.get_by_uuid(photo_uuid)
-    if not photo:
+    entry = Entry.get_by_uuid(entry_uuid)
+    if not entry:
         # 見つからない場合は404エラー送出
         raise Http404
     temp_values = {
-        "target":"photo",
-        "title":u"写真詳細[ %s ]" % photo.title,
-        "photo":photo,
+        "target":"entry",
+        "title":u"写真詳細[ %s ]" % entry.title,
+        "entry":entry,
         "subscroll":True,
         "datepicker":"datepicker",
         }
-    return render_to_response('photo/detail.html',temp_values,
+    return render_to_response('entry/detail.html',temp_values,
                               context_instance=RequestContext(request))
 
 

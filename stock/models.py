@@ -7,10 +7,11 @@ Created by mmiyaji on 2013-01-05.
 Copyright (c) 2013  ruhenheim.org. All rights reserved.
 """
 
-import sys, os, datetime, uuid
+import sys, os, datetime, uuid, commands
 from django.db import models
 from django.db.models import Q
 from django.core.cache import cache
+from django.core.files import File
 from django.conf import settings
 from django.utils.encoding import force_unicode, smart_str
 from PIL import Image
@@ -38,7 +39,7 @@ class Author(models.Model):
     graduated_at = models.DateTimeField(blank=True, null=True, db_index=True)
     updated_at = models.DateTimeField(auto_now = True, db_index=True)
     created_at = models.DateTimeField(auto_now_add = True, db_index=True)
-    def get_entries(self, span=10, page=0, search_query=None, isvalid=True, order="-created_at", all=False, listvalue=None):
+    def get_entrys(self, span=10, page=0, search_query=None, isvalid=True, order="-created_at", all=False, listvalue=None):
         """
         自分の著作を返す
         """
@@ -59,13 +60,13 @@ class Author(models.Model):
     def my_groups(self):
         # 所属するグループのリストを作成
         groups = []
-        g = self.get_groups()
-        syear = self.admitted_at.year
-        for i in range(syear, syear+6):
-            gh = GroupHandler.get_item(self,i)
-            gn = ""
-            if gh and gh.group: gn = gh.group.name
-            groups.append((i,gn))
+        # g = self.get_groups()
+        # syear = self.admitted_at.year
+        # for i in range(syear, syear+6):
+        #     gh = GroupHandler.get_item(self,i)
+        #     gn = ""
+        #     if gh and gh.group: gn = gh.group.name
+        #     groups.append((i,gn))
         return groups
     @staticmethod
     def get_years():
@@ -140,6 +141,15 @@ class Author(models.Model):
             result = None
         return result
 
+    @staticmethod
+    def get_by_id(id):
+        result=None
+        try:
+            result = Author.objects.get(id=int(id))
+        except:
+            result = None
+        return result
+
     def __str__(self):
         return "%s" % (self.name)
     def __unicode__(self):
@@ -175,9 +185,11 @@ class Tag(models.Model):
     isvalid = models.BooleanField(default=True, db_index=True)
     updated_at = models.DateTimeField(auto_now = True, db_index=True)
     created_at = models.DateTimeField(auto_now_add = True, db_index=True)
+
     @staticmethod
     def get_all():
         return Tag.objects.filter(isvalid__exact=True)
+
     @staticmethod
     def get_items(page=0, span=10):
         result = Tag.objects.filter(isvalid__exact=True)
@@ -185,9 +197,11 @@ class Tag(models.Model):
             page = page*span - span
             endpage = page + span
         return result[page:endpage],result.count()
+
     @staticmethod
     def tag_list():
         return Tag.objects.all()
+
     @staticmethod
     def get_by_id(id):
         result=None
@@ -218,23 +232,20 @@ class Entry(models.Model):
     title = models.CharField(max_length = 100, default="", blank=True, null=True)
     original_title = models.CharField(max_length = 100, default="", blank=True, null=True)
     orientation = models.IntegerField(default=0, blank=True, null=True)
-    image = models.ImageField(upload_to=get_origin_upload_path,
-                              width_field="image_width",
-                              height_field="image_height",
+    file = models.FileField(upload_to=get_origin_upload_path,
                               blank=True, null=True
                               )
-    filepath = models.FilePathField(path=get_origin_upload_path,
-                              blank=True, null=True
-                              )
-    image_width = models.IntegerField(blank=True, null=True)
-    image_height = models.IntegerField(blank=True, null=True)
+    # filepath = models.FilePathField(path=get_origin_upload_path,
+    #                           blank=True, null=True
+    #                           )
     thumbnail = models.ImageField(upload_to=get_thumb_upload_path,
-                                  width_field="thumbnail_width",
-                                  height_field="thumbnail_height",
+                                  # width_field="thumbnail_width",
+                                  # height_field="thumbnail_height",
                                   blank=True, null=True
                                   )
-    thumbnail_width = models.IntegerField(blank=True, null=True)
-    thumbnail_height = models.IntegerField(blank=True, null=True)
+    # thumbnail_width = models.IntegerField(blank=True, null=True)
+    # thumbnail_height = models.IntegerField(blank=True, null=True)
+    filetype = models.CharField(max_length = 50, default="", blank=True, null=True, db_index=True)
     caption = models.CharField(max_length = 250, default="", blank=True, null=True, db_index=True)
     comment = models.TextField(default="", db_index=True)
     isvalid = models.BooleanField(default=True, db_index=True)
@@ -242,12 +253,14 @@ class Entry(models.Model):
     updated_at = models.DateTimeField(auto_now = True, db_index=True)
     created_at = models.DateTimeField(auto_now_add = True, db_index=True)
     tag = models.ManyToManyField(Tag, blank=True, null=True, db_index=True)
+
     @staticmethod
     def get_years():
         """
         すべての登録書籍の年度リストを返す
         """
         return Entry.objects.dates('published_at', 'year')
+
     @staticmethod
     def get_items(author=None, span=10, page=0,
                   search_query=None, admitted_query=None, published_query=None, tag_queries=None, query_type=False,
@@ -333,10 +346,19 @@ class Entry(models.Model):
 
     def get_authors(self):
         return self.authors.all()
+    def get_original_file_url(self):
+        return "/media/"+str(self.file.name.encode("utf-8"))
     def get_original_img_url(self):
-        return "/media/"+str(self.image.name.encode("utf-8"))
+        return str(self.file.path.encode("utf-8"))
     def get_thumbnail_img_url(self):
         return "/media/"+str(self.thumbnail.name.encode("utf-8"))
+    def embeded(self):
+        if self.filetype == "application/pdf":
+            return True
+        elif self.filetype.count("video") > 0 or self.filetype == "application/octet-stream":
+            return True
+        else:
+            return False
     def __str__(self):
         # aname = ""
         # for i in self.author:
@@ -358,28 +380,48 @@ class Entry(models.Model):
                 self.uuid = cuuid
             super(Entry, self).save(force_update, force_insert)
         else:
-            image = Image.open(self.image)
+            if self.filetype == "application/pdf":
+                image_url = os.path.join(settings.MEDIA_URL, 'tmp', self.file.name)
+                # image_url = self.file.path
+                print "file:",image_url, self.file
+                print commands.getoutput("convert '%s[0]' -resize 600x800 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
+                image = File(open(image_url.encode("utf-8")+".png"))
+                self.thumbnail = image
+            elif self.filetype.count("image") > 0:
+                image_url = os.path.join(settings.MEDIA_URL, 'tmp', self.file.name)
+                image = File(open(image_url.encode("utf-8")))
+                self.thumbnail = image
+            elif self.filetype.count("video") > 0 or self.filetype == "application/octet-stream":
+                image_url = os.path.join(settings.MEDIA_URL, 'tmp', self.file.name)
+                # image_url = self.file.path
+                print "file:",image_url, self.file
+                print commands.getoutput("ffmpeg -ss 1 -vframes 1 -i '%s' -f image2 '%s.png'" % (image_url.encode("utf-8"), image_url.encode("utf-8")))
+                image = File(open(image_url.encode("utf-8")+".png"))
+                self.thumbnail = image
+            else:
+                self.thumbnail = File(open(os.path.join(settings.MEDIA_URL, 'images', 'noimage.png')))
+            # image = Image.open(self.image)
             # if image.mode not in ('L', 'RGB'): # ウィンドウシャドウが消えるので変換中止
             #     image = image.convert('RGB')
             # save the original size
-            self.image_width, self.image_height = image.size
-            image.thumbnail(thumb_size, Image.ANTIALIAS)
-            try: # EXIF にしたがってサムネイル画像を回転
-                if self.orientation and self.orientation != 1:
-                    r = {3:180,6:-90,8:90}
-                    image = image.rotate(r[self.orientation])
-            except:
-                pass
-            # save the thumbnail to memory
-            temp_handle = StringIO()
-            image.save(temp_handle, 'png')
-            temp_handle.seek(0) # rewind the file
-            # save to the thumbnail field
-            suf = SimpleUploadedFile(os.path.split(self.image.name)[-1],
-                                     temp_handle.read(),
-                                     content_type='image/png')
-            self.thumbnail.save(suf.name+'.png', suf, save=False)
-            self.thumbnail_width, self.thumbnail_height = image.size
+            # self.image_width, self.image_height = image.size
+            # image.thumbnail(thumb_size, Image.ANTIALIAS)
+            # try: # EXIF にしたがってサムネイル画像を回転
+            #     if self.orientation and self.orientation != 1:
+            #         r = {3:180,6:-90,8:90}
+            #         image = image.rotate(r[self.orientation])
+            # except:
+            #     pass
+            # # save the thumbnail to memory
+            # temp_handle = StringIO()
+            # image.save(temp_handle, 'png')
+            # temp_handle.seek(0) # rewind the file
+            # # save to the thumbnail field
+            # suf = SimpleUploadedFile(os.path.split(self.image.name)[-1],
+            #                          temp_handle.read(),
+            #                          content_type='image/png')
+            # self.thumbnail.save(suf.name+'.png', suf, save=False)
+            # self.thumbnail_width, self.thumbnail_height = image.size
             # save the image object
             super(Entry, self).save(force_update, force_insert)
 
